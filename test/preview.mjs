@@ -4,7 +4,8 @@ import { readFile, writeFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import { renderPage } from './render.mjs'
 
-const fixture = JSON.parse(await readFile(new URL('./fixture.json', import.meta.url), 'utf8'))
+const fixturePath = process.env.PREVIEW_FIXTURE ?? new URL('./fixture.json', import.meta.url)
+const fixture = JSON.parse(await readFile(fixturePath, 'utf8'))
 const outPath = process.env.PREVIEW_OUT ?? fileURLToPath(new URL('./preview.html', import.meta.url))
 const chartWidth = Number(process.env.CHART_WIDTH ?? 1188)
 

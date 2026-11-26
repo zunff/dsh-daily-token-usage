@@ -25,10 +25,10 @@ function Segmented({ value, options, onChange, label }) {
           onClick={() => onChange(option.value)}
           aria-pressed={option.value === value ? 'true' : 'false'}
           className={cn(
-            'rounded-[5px] px-1.5 py-0.5 text-[10.5px]',
+            'rounded-[5px] border px-1.5 py-0.5 text-[10.5px] transition-colors',
             option.value === value
-              ? 'bg-background font-medium text-foreground shadow-sm'
-              : 'text-subtle-foreground hover:text-foreground',
+              ? 'border-line bg-background font-medium text-foreground shadow-sm'
+              : 'border-transparent text-subtle-foreground hover:text-foreground',
           )}
         >
           {option.label}
@@ -97,7 +97,13 @@ function Summary({ today, currency, costMode, onCostMode, peak }) {
             <div className="mt-1 flex items-baseline justify-end gap-1.5">
               <span className="text-[20px] font-semibold leading-none tracking-tight">{cost}</span>
               <span
-                className="rounded bg-surface px-1 py-px text-[9.5px] leading-none text-muted-foreground"
+                className={cn(
+                  'rounded border px-1 py-px text-[9.5px] leading-none',
+                  // On a grey card a grey chip is invisible; the state carries a color.
+                  peak
+                    ? 'border-warn/30 bg-warn/10 text-warn'
+                    : 'border-line bg-background text-muted-foreground',
+                )}
                 title="北京时区工作日 09:00–12:00、14:00–18:00 按全价估算，其余时间按 5 折；法定节假日不作特殊处理。"
               >
                 现在{peak ? '高峰 ×1' : '空闲 ×0.5'}
@@ -297,6 +303,7 @@ export function UsagePage({ initialPricesOpen = false } = {}) {
         currency={currency}
         onClose={() => setPricesOpen(false)}
         onSaved={report.retry}
+        onRetry={report.retry}
       />
     </div>
   )

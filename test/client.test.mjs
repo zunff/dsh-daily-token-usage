@@ -75,6 +75,15 @@ assert.match(open, /继承自 \*/, 'a row priced by the fallback says so')
 assert.match(open, /未定价/, 'a row with no price says so')
 assert.equal((open.match(/type="number"/g) ?? []).length, (fixture.routes.length + 1) * 4, 'four inputs per row, plus the fallback row')
 
+// A report from a host half that predates the price table: say why, and offer
+// the retry instead of an empty box.
+const noPrices = JSON.parse(await readFile(new URL('./fixture-no-prices.json', import.meta.url), 'utf8'))
+const degraded = await renderPage({ fixture: noPrices, props: { initialPricesOpen: true } })
+assert.match(degraded.html, /这一页还拿不到单价表/)
+assert.match(degraded.html, /重启 DSH/)
+assert.match(degraded.html, /重新读取/)
+assert.doesNotMatch(degraded.html, /每百万 token 的高峰价/, 'no table is promised when there is none')
+
 // --- failure ----------------------------------------------------------------
 const failed = await renderPage({
   fixture,

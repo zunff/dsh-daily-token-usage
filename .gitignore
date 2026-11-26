@@ -2,7 +2,7 @@ node_modules/
 .pnpm-store/
 
 # Rendered artifacts of the local preview, not part of the bundle.
-test/preview.html
+test/preview*.html
 test/*.png
 
 *.log

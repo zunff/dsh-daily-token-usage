@@ -1,7 +1,6 @@
 /* Tailwind without preflight: this stylesheet is injected into a live host page,
    so global resets would repaint the whole app. Import theme and utilities only. */
 @layer theme, base, components, utilities;
-
 /* Only scan real sources: scanning the built bundle would keep growing the CSS. */
 @source not "../dist";
 
@@ -16,7 +15,7 @@
   --color-subtle-foreground: var(--dsw-alias-label-tertiary, #8b909a);
   --color-line: var(--dsw-alias-border-l1, rgba(20, 22, 30, 0.1));
   --color-line-strong: var(--dsw-alias-border-l2, rgba(20, 22, 30, 0.16));
-  --color-brand: var(--dsw-alias-state-business-primary, #4c8dff);
+  --color-brand: var(--dsw-alias-brand-primary, #4c8dff);
   --color-success: var(--dsw-alias-state-success-primary, #2f9e44);
   --color-danger: var(--dsw-alias-state-error-primary, #e03131);
   --color-warn: var(--dsw-alias-state-warn-primary, #d49b00);
@@ -27,4 +26,23 @@
   font-size: 12px;
   line-height: 1.5;
   font-variant-numeric: tabular-nums;
+}
+
+/* Without preflight, form controls keep the browser's own font instead of the
+   page's; the host sets its type on the root only, so inherit it here. */
+.dtu-root button,
+.dtu-root input,
+.dtu-root select {
+  font-family: inherit;
+  letter-spacing: inherit;
+}
+
+/* Preflight also carries the border-box reset. Scoped to this page it is safe:
+   without it `h-full` plus padding overflows its own box by exactly the padding,
+   and a full-height column ends up taller than the pane that holds it. */
+.dtu-root,
+.dtu-root *,
+.dtu-root *::before,
+.dtu-root *::after {
+  box-sizing: border-box;
 }
