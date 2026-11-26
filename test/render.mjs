@@ -145,6 +145,8 @@ export async function renderPage(options = {}) {
       if (node === null || node === undefined || node === false || node === true) return ''
       if (typeof node === 'string' || typeof node === 'number') return escapeText(node)
       if (Array.isArray(node)) return node.map((child, index) => render(child, `${path}.${index}`)).join('')
+      // A fragment is not an element: its children are siblings of the parent.
+      if (node.type === React.Fragment) return render(node.props?.children, `${path}.fragment`)
 
       if (typeof node.type === 'function') {
         const key = `${path}:${node.type.name || 'component'}`

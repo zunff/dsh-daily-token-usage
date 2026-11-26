@@ -10,7 +10,8 @@ The same pass over a log builds the request flow: each settlement becomes one ro
 
 ## How to read it
 
-- **Left sidebar**: a `用量` row sits with the other panels (`插件`, `自动化任务`) and opens a full-width page: today's headline, cache-hit rate and estimate, a composition bar with the uncached/cache-read/output split, a daily bar chart with a hover tooltip, and the recent request flow. The page refreshes itself every minute and carries a `刷新` button.
+- **Left sidebar**: a `用量` row sits with the other panels (`插件`, `自动化任务`) and opens a full-width page: today's headline, cache-hit rate and estimate, a composition bar with the uncached/cache-read/output split, a trend card with `每日` / `今日` tabs, and the recent request flow. The page refreshes itself every minute and carries a `刷新` button.
+- **`每日`** stacks the last 7 / 14 / 30 days of tokens. **`今日`** is the same chart one day wide: 24 hourly columns, each hour's peak or off-peak tariff painted behind it, and a thin row of request counts under the bars, because an hour that burns tokens in one long call is not the same hour as one that burns them in twenty short ones.
 - **One-line footer**: totals and the way into `单价…`, which edits each route's price in the page instead of in a JSON file.
 - Type `/usage` in any conversation. An optional number selects the window: `/usage 30`.
 - Or ask an agent to report usage; the `token_usage` tool returns the same text and accepts `days`.
@@ -76,6 +77,16 @@ readings come from the report itself (`costParts` per bucket), so the two views 
 and a row's `费用` tooltip says which side of the boundary that settlement fell on. The day's
 estimate then adds up to something a reader can check. Chinese statutory holidays are not
 special-cased, so a holiday weekday is estimated at peak.
+
+The trend card keeps a request count beside every token figure — in the header, in each tooltip,
+and as its own strip under the hourly bars. A day can be expensive in a few long calls or cheap in
+many short ones, and a token-only page cannot tell those apart.
+
+The hourly view paints the tariff behind the bars: peak hours (Beijing weekdays 09:00–12:00 and
+14:00–18:00) in the warning tint, the rest in a cool grey, both derived from host theme tokens so
+dark mode follows. Cache reads are the cheap bulk of almost every day, so their band is a light
+tint and the paid bands are the vivid ones: a chart that is 97% one saturated colour cannot be
+read at all.
 
 Only failures are marked in the request table: a column of identical `成功` cells spends width and
 says nothing.

@@ -123,12 +123,35 @@ function emptyRoute() {
   return { peak: emptyCounts(), off: emptyCounts() }
 }
 
+/** One local hour of one day, split by route so the hour can be priced later. */
+function emptyHour() {
+  return { models: Object.create(null) }
+}
+
 function emptyDay() {
-  return { input: 0, cacheRead: 0, cacheWrite: 0, output: 0, reasoning: 0, requests: 0, models: Object.create(null) }
+  return {
+    input: 0,
+    cacheRead: 0,
+    cacheWrite: 0,
+    output: 0,
+    reasoning: 0,
+    requests: 0,
+    models: Object.create(null),
+    hours: Object.create(null),
+  }
 }
 
 function zeroCounts() {
-  return { input: 0, cacheRead: 0, cacheWrite: 0, output: 0, reasoning: 0, requests: 0, models: Object.create(null) }
+  return {
+    input: 0,
+    cacheRead: 0,
+    cacheWrite: 0,
+    output: 0,
+    reasoning: 0,
+    requests: 0,
+    models: Object.create(null),
+    hours: Object.create(null),
+  }
 }
 
 /** Local calendar day of an epoch-millisecond timestamp, as `YYYY-MM-DD`. */
@@ -273,6 +296,19 @@ function addCounts(target, bucket) {
       }
     }
   }
+  if (bucket.hours !== undefined) {
+    for (const [hour, sample] of Object.entries(bucket.hours)) {
+      const slot = target.hours[hour] ?? (target.hours[hour] = emptyHour())
+      for (const [key, counts] of Object.entries(sample.models)) {
+        const entry = slot.models[key] ?? (slot.models[key] = emptyCounts())
+        entry.input += counts.input
+        entry.cacheRead += counts.cacheRead
+        entry.cacheWrite += counts.cacheWrite
+        entry.output += counts.output
+        entry.requests += counts.requests
+      }
+    }
+  }
   return target
 }
 
@@ -384,6 +420,42 @@ function costPartsOf(bucket, prices) {
 function costOf(bucket, prices) {
   const parts = costPartsOf(bucket, prices)
   return parts === null ? null : parts.total
+}
+
+/**
+ * One local hour of one day: totals, the peak/off-peak band the hour falls in,
+ * and its own price. Counts are kept per route inside the hour, so an hour is
+ * priced exactly like a day rather than by scaling a day's average.
+ */
+function hourOf(date, hour, sample, prices) {
+  const [year, month, day] = date.split('-').map(Number)
+  const band = isPeak(new Date(year, month - 1, day, hour).getTime()) ? 'peak' : 'off'
+  const counts = { input: 0, cacheRead: 0, cacheWrite: 0, output: 0, requests: 0 }
+  const models = {}
+  for (const [key, entry] of Object.entries(sample?.models ?? {})) {
+    counts.input += entry.input
+    counts.cacheRead += entry.cacheRead
+    counts.cacheWrite += entry.cacheWrite
+    counts.output += entry.output
+    counts.requests += entry.requests
+    models[key] = { peak: emptyCounts(), off: emptyCounts() }
+    models[key][band] = entry
+  }
+  const parts = costPartsOf({ models }, prices)
+  return {
+    hour,
+    peak: band === 'peak',
+    ...counts,
+    total: counts.input + counts.cacheRead + counts.cacheWrite + counts.output,
+    cost: parts === null ? null : parts.total,
+    costParts: parts,
+  }
+}
+
+/** Every local hour of one day, empty ones included so the chart has 24 slots. */
+function hoursOf(view, date, prices) {
+  const bucket = view.days[date] ?? zeroCounts()
+  return Array.from({ length: 24 }, (_, hour) => hourOf(date, hour, bucket.hours?.[hour], prices))
 }
 
 /**
@@ -646,6 +718,17 @@ export function apply(ctx) {
         band.output += counts.output
         band.requests += 1
 
+        // The same settlement filed under its local hour, per route, so the page
+        // can show today hour by hour and still price each hour correctly.
+        const hour = new Date(event.time).getHours()
+        const hourBucket = bucket.hours[hour] ?? (bucket.hours[hour] = emptyHour())
+        const hourCounts = hourBucket.models[settledRoute] ?? (hourBucket.models[settledRoute] = emptyCounts())
+        hourCounts.input += counts.input
+        hourCounts.cacheRead += counts.cacheRead
+        hourCounts.cacheWrite += counts.cacheWrite
+        hourCounts.output += counts.output
+        hourCounts.requests += 1
+
         const shape = shapes[settledRoute] ?? (shapes[settledRoute] = { settlements: 0, maxShare: 0, exceeds: false })
         shape.settlements += 1
         if (counts.cacheRead > counts.input) shape.exceeds = true
@@ -858,6 +941,17 @@ export function apply(ctx) {
         counts.input -= cached
         counts.cacheRead = cached
         changed = true
+      }
+      // The hourly view of this route needs the same correction, or the day and
+      // its hours would disagree about where the cached tokens went.
+      for (const hour of Object.values(bucket.hours ?? {})) {
+        const counts = hour.models?.[key]
+        if (counts === undefined) continue
+        if (!shape.pinned && counts.cacheRead > counts.input) continue
+        const cached = Math.min(counts.cacheRead, counts.input)
+        if (cached <= 0) continue
+        counts.input -= cached
+        counts.cacheRead = cached
       }
     }
     if (!changed) return
@@ -1171,6 +1265,9 @@ export function apply(ctx) {
     }), { input: 0, cacheRead: 0, cacheWrite: 0, output: 0, total: 0 })
     return {
       today: bucketOf(localDay(nowDate.getTime())),
+      // Hour by hour for today: the page's 今日 tab. Kept apart from `rows`,
+      // which is one bucket per day regardless of the window.
+      hours: hoursOf(view, localDay(nowDate.getTime()), prices),
       rows,
       window: {
         days,

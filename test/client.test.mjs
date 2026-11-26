@@ -54,6 +54,18 @@ assert.equal((ready.html.match(/>成功</g) ?? []).length, 0, 'a successful requ
 assert.match(ready.html, /bp-DeepSeek-V4\.1-Flash/, 'the model is named the way the catalog names it')
 assert.match(ready.html, /bp-DeepSeek-V4\.1-Flash（deepseek-official\/ds\/deepseek-flash）/, 'the routed id stays reachable')
 
+// --- hourly tab -------------------------------------------------------------
+const hourly = await renderPage({ fixture, props: { initialTrendTab: 'hour' } })
+assert.match(hourly.html, /每小时用量/)
+assert.match(hourly.html, /今日/, 'the hourly tab is selected')
+assert.match(hourly.html, /高峰/, 'peak hours are named in the legend')
+assert.match(hourly.html, /空闲/, 'off-peak hours are named in the legend')
+assert.match(hourly.html, />次数</, 'request counts get their own row')
+assert.match(hourly.html, /今天 · .+ · [\d,]+ 次/, 'the header carries the day total and its count')
+for (const hour of ['0', '6', '12', '21']) {
+  assert.ok(hourly.html.includes(`>${hour}<`), `hour tick ${hour}`)
+}
+
 // --- notes ------------------------------------------------------------------
 assert.match(ready.html, /输入口径已折算/, 'the prompt-shape note collapses into one word')
 assert.match(ready.html, /单价…/, 'the footer leads to the price editor')
@@ -85,6 +97,9 @@ assert.match(degraded.html, /这一页还拿不到单价表/)
 assert.match(degraded.html, /重启 DSH/)
 assert.match(degraded.html, /重新读取/)
 assert.doesNotMatch(degraded.html, /每百万 token 的高峰价/, 'no table is promised when there is none')
+
+const degradedHours = await renderPage({ fixture: noPrices, props: { initialTrendTab: 'hour' } })
+assert.match(degradedHours.html, /这个报表没有按小时的数据/, 'an old payload says why the hourly tab is empty')
 
 // --- failure ----------------------------------------------------------------
 const failed = await renderPage({

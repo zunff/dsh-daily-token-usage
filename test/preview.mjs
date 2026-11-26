@@ -12,7 +12,11 @@ const chartWidth = Number(process.env.CHART_WIDTH ?? 1188)
 const { html, css } = await renderPage({
   fixture,
   chartWidth,
-  props: { initialPricesOpen: process.env.PRICES_OPEN === '1' },
+  // Which surface to shoot: the page, the price panel, or the hourly tab.
+  props: {
+    initialPricesOpen: process.env.PRICES_OPEN === '1',
+    initialTrendTab: process.env.TREND_TAB === 'hour' ? 'hour' : 'day',
+  },
 })
 if (!css) throw new Error('the plugin did not inject a stylesheet')
 

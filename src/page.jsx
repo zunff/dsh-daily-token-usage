@@ -1,7 +1,7 @@
 import React from 'react'
 import { Card, CardTitle } from './components/ui/card.jsx'
 import { Button } from './components/ui/button.jsx'
-import { BANDS, ChartLegend, DailyChart } from './chart.jsx'
+import { BANDS, ChartLegend, DailyChart, HourlyChart } from './chart.jsx'
 import { RequestsTable } from './requests-table.jsx'
 import { PricePanel } from './price-panel.jsx'
 import { POLL_MS, useMeasuredWidth, useReport } from './api.js'
@@ -139,25 +139,60 @@ function Summary({ today, currency, costMode, onCostMode, peak }) {
   )
 }
 
-function DailyCard({ rows, window, hasWrite, currency }) {
+/**
+ * One card, two readings of the same report: the daily bars, and today hour by
+ * hour. Both keep the request count beside the token total, since a day can be
+ * expensive in a few long calls or cheap in many short ones.
+ */
+function TrendCard({ rows, hours, window, hasWrite, currency, tab, onTab }) {
   const [chartRef, chartWidth] = useMeasuredWidth(1120)
+  const hourly = tab === 'hour'
   const firstRecorded = rows.findIndex(row => row.total > 0)
   const visible = firstRecorded === -1 ? [] : rows.slice(firstRecorded)
-  const cost = window.cost === null || window.cost === undefined ? null : money(window.cost, currency)
+  const dayCost = window.cost === null || window.cost === undefined ? null : money(window.cost, currency)
+
+  const hourTotals = (hours ?? []).reduce((totals, hour) => ({
+    total: totals.total + hour.total,
+    requests: totals.requests + hour.requests,
+    cost: hour.cost === null || hour.cost === undefined ? totals.cost : (totals.cost ?? 0) + hour.cost,
+  }), { total: 0, requests: 0, cost: null })
+  const hourCost = hourTotals.cost === null ? null : money(hourTotals.cost, currency)
+
+  let summary
+  if (hourly) {
+    summary = `今天 · ${tokens(hourTotals.total)} · ${group(hourTotals.requests)} 次${hourCost === null ? '' : ` · ${hourCost}`}`
+  } else {
+    summary = `最近 ${window.days} 天 · ${tokens(window.total)} · ${group(window.requests)} 次${dayCost === null ? '' : ` · ${dayCost}`}`
+  }
 
   return (
     <Card className="shrink-0 px-4 pb-2 pt-3">
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-        <CardTitle>每日用量</CardTitle>
-        <span className="text-[11px] text-subtle-foreground">
-          最近 {window.days} 天 · {tokens(window.total)}
-          {cost === null ? '' : ` · ${cost}`}
-        </span>
+        <CardTitle>{hourly ? '每小时用量' : '每日用量'}</CardTitle>
+        <Segmented
+          value={tab}
+          onChange={onTab}
+          label="趋势口径"
+          options={[{ value: 'day', label: '每日' }, { value: 'hour', label: '今日' }]}
+        />
+        <span className="text-[11px] text-subtle-foreground">{summary}</span>
         <div className="flex-1" />
-        <ChartLegend showWrite={hasWrite} />
+        <ChartLegend showWrite={hasWrite} peakBands={hourly} />
       </div>
       <div ref={chartRef} className="mt-1">
-        {visible.length === 0 ? (
+        {hourly ? (
+          hours === undefined ? (
+            <div className="flex h-[176px] items-center justify-center text-[11px] text-subtle-foreground">
+              这个报表没有按小时的数据：宿主端插件需要更新后重启 DSH。
+            </div>
+          ) : hourTotals.total === 0 ? (
+            <div className="flex h-[176px] items-center justify-center text-[11px] text-subtle-foreground">
+              今天还没有记录
+            </div>
+          ) : (
+            <HourlyChart rows={hours} width={chartWidth} showWrite={hasWrite} currency={currency} />
+          )
+        ) : visible.length === 0 ? (
           <div className="flex h-[178px] items-center justify-center text-[11px] text-subtle-foreground">
             最近 {window.days} 天还没有记录
           </div>
@@ -203,11 +238,12 @@ function Footer({ allTime, promptNote, unpriced, currency, onOpenPrices }) {
   )
 }
 
-/** Main-column page opened from the left sidebar row. `initialPricesOpen` is for the preview renderer. */
-export function UsagePage({ initialPricesOpen = false } = {}) {
+/** Main-column page opened from the left sidebar row. The two `initial*` props are for the preview renderer. */
+export function UsagePage({ initialPricesOpen = false, initialTrendTab = 'day' } = {}) {
   const [days, setDays] = React.useState(14)
   const [costMode, setCostMode] = React.useState(false)
   const [pricesOpen, setPricesOpen] = React.useState(initialPricesOpen)
+  const [trendTab, setTrendTab] = React.useState(initialTrendTab)
   const report = useReport(days)
   const data = report.data
 
@@ -274,7 +310,15 @@ export function UsagePage({ initialPricesOpen = false } = {}) {
       ) : null}
 
       <Summary today={today} currency={currency} costMode={costMode} onCostMode={setCostMode} peak={isPeak()} />
-      <DailyCard rows={data.rows} window={data.window} hasWrite={hasWrite} currency={currency} />
+      <TrendCard
+        rows={data.rows}
+        hours={data.hours}
+        window={data.window}
+        hasWrite={hasWrite}
+        currency={currency}
+        tab={trendTab}
+        onTab={setTrendTab}
+      />
 
       <Card className="flex min-h-0 flex-1 flex-col overflow-hidden">
         <div className="flex shrink-0 items-center gap-2 border-b border-line px-4 py-2">

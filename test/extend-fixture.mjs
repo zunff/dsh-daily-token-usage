@@ -73,9 +73,35 @@ for (const entry of synthetic) {
 list.sort((left, right) => (right.cost ?? 0) - (left.cost ?? 0) || (right.total - left.total))
 console.log('routes:', list.map(row => `${row.key}(${row.priceSource ?? '未定价'})`))
 
+// Hourly buckets for the 今日 tab, shaped like a working day: quiet night, a
+// morning run, a lunch dip, a busy afternoon. Peak hours follow DeepSeek's rule.
+const PEAK = hour => (hour >= 9 && hour < 12) || (hour >= 14 && hour < 18)
+const WEIGHTS = [0, 0, 0, 0, 0, 0, 1, 3, 6, 9, 7, 5, 3, 4, 8, 9, 7, 4, 2, 1, 0, 0, 0, 0]
+const weightSum = WEIGHTS.reduce((sum, value) => sum + value, 0)
+const share = hour => WEIGHTS[hour] / weightSum
+const hours = Array.from({ length: 24 }, (_, hour) => {
+  const part = share(hour)
+  const total = Math.round(fixture.today.total * part)
+  const requests = Math.round(fixture.today.requests * part)
+  return {
+    hour,
+    peak: PEAK(hour),
+    input: Math.round(fixture.today.input * part),
+    cacheRead: Math.round(fixture.today.cacheRead * part),
+    cacheWrite: 0,
+    output: Math.round(fixture.today.output * part),
+    requests,
+    total,
+    cost: Number((fixture.today.cost * part).toFixed(6)),
+    costParts: null,
+  }
+})
+hours.forEach(hour => { hour.total = hour.input + hour.cacheRead + hour.output })
+
 const table = { 'deepseek-flash': FLASH, 'deepseek-v4-pro': PRO, '*': FLASH }
 const extended = {
   today: fixture.today,
+  hours,
   rows: fixture.rows,
   window: fixture.window,
   allTime: fixture.allTime,

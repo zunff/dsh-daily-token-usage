@@ -579,4 +579,42 @@ const sessionsWithRoute = () => new Map([
   await rm(home, { recursive: true, force: true })
 }
 
+// ---------------------------------------------------------------- scenario L
+// The 今日 tab reads today hour by hour. Each hour carries its own counts, its
+// own price, and the tariff band it falls in, and the hours add up to the day.
+{
+  const home = await mkdtemp(path.join(tmpdir(), 'daily-usage-l-'))
+  process.env.DSH_HOME = home
+  const server = fakeWebServer()
+  const ten = new Date(midnight)
+  ten.setHours(10, 0, 0, 0)
+  const nineteen = new Date(midnight)
+  nineteen.setHours(19, 0, 0, 0)
+  const ctx = makeContext(fakePersistence(new Map([
+    ['hours', {
+      revision: 'l1',
+      events: [
+        message(0, ten.getTime(), { inputTokens: 1000, outputTokens: 100 }),
+        message(1, nineteen.getTime(), { inputTokens: 40, outputTokens: 4 }),
+      ],
+    }],
+  ])), server)
+  apply(ctx)
+
+  const json = await reportJson(server, 14)
+  assert.equal(json.hours.length, 24, 'one bucket per local hour')
+  const weekday = ten.getDay() >= 1 && ten.getDay() <= 5
+  assert.equal(json.hours[10].peak, weekday, '10:00 is peak on a weekday')
+  assert.equal(json.hours[19].peak, false, '19:00 is always off-peak')
+  assert.equal(json.hours[10].requests, 1)
+  assert.equal(json.hours[10].total, 1100)
+  assert.equal(json.hours[19].total, 44)
+  assert.equal(json.hours[3].requests, 0, 'an unused hour still has a slot')
+  assert.equal(json.hours.reduce((sum, hour) => sum + hour.total, 0), json.today.total, 'the hours add up to the day')
+  assert.equal(json.hours.reduce((sum, hour) => sum + hour.requests, 0), json.today.requests)
+  assert.ok(json.hours[10].cost > json.hours[19].cost, 'an hour is priced on its own counts')
+  console.log('scenario L passed')
+  await rm(home, { recursive: true, force: true })
+}
+
 console.log('ALL ASSERTIONS PASSED')
