@@ -10,8 +10,8 @@ The same pass over a log builds the request flow: each settlement becomes one ro
 
 ## How to read it
 
-- **Left sidebar**: a `用量` row sits with the other panels (`插件`, `自动化任务`) and opens a full-width page: today's headline, cache-hit rate and estimate, a composition bar with the uncached/cache-read/output split, a trend card with `每日` / `今日` tabs, and the recent request flow. The page refreshes itself every minute and carries a `刷新` button.
-- **`每日`** stacks the last 7 / 14 / 30 days of tokens. **`今日`** is the same chart one day wide: 24 hourly columns, each hour's peak or off-peak tariff painted behind it, and a thin row of request counts under the bars, because an hour that burns tokens in one long call is not the same hour as one that burns them in twenty short ones.
+- **Left sidebar**: a `用量` row sits with the other panels (`插件`, `自动化任务`) and opens a full-width page: a range selector, the headline for that range, a composition bar with the uncached/cache-read/output split, a trend card, and the recent request flow. The page refreshes itself every minute and carries a `刷新` button.
+- **One range selector** at the top right — `今日` / `7 天` / `14 天` / `30 天`, default `今日` — drives the headline, the composition bar and the chart together, so the page never shows two different spans at once. `今日` is one day wide: 24 hourly columns, each hour's peak or off-peak tariff painted behind it, and a thin row of request counts under the bars. A numeric range shows that many daily columns instead.
 - **One-line footer**: totals and the way into `单价…`, which edits each route's price in the page instead of in a JSON file.
 - Type `/usage` in any conversation. An optional number selects the window: `/usage 30`.
 - Or ask an agent to report usage; the `token_usage` tool returns the same text and accepts `days`.
@@ -86,7 +86,8 @@ The hourly view paints the tariff behind the bars: peak hours (Beijing weekdays 
 14:00–18:00) in the warning tint, the rest in a cool grey, both derived from host theme tokens so
 dark mode follows. Cache reads are the cheap bulk of almost every day, so their band is a light
 tint and the paid bands are the vivid ones: a chart that is 97% one saturated colour cannot be
-read at all.
+read at all. The `现在高峰 ×1` chip belongs to the one-day view only — "now" is not a fact about a
+window.
 
 Only failures are marked in the request table: a column of identical `成功` cells spends width and
 says nothing.

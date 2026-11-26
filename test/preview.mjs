@@ -15,7 +15,7 @@ const { html, css } = await renderPage({
   // Which surface to shoot: the page, the price panel, or the hourly tab.
   props: {
     initialPricesOpen: process.env.PRICES_OPEN === '1',
-    initialTrendTab: process.env.TREND_TAB === 'hour' ? 'hour' : 'day',
+    initialRange: process.env.RANGE === 'day' ? 14 : 'today',
   },
 })
 if (!css) throw new Error('the plugin did not inject a stylesheet')

@@ -9,6 +9,8 @@ import { cacheHit, group, isPeak, money, pad2, percent, scale, todayKey, tokens 
 import { cn } from './lib/utils.js'
 
 const WINDOWS = [7, 14, 30]
+/** Days fetched while the page shows a single day: enough for the footer and the price table. */
+const DEFAULT_WINDOW = 14
 
 /** Two-option switch: the window, and the composition bar's unit. */
 function Segmented({ value, options, onChange, label }) {
@@ -62,15 +64,20 @@ function MetricLegend({ bands, total, currency, costMode }) {
   )
 }
 
-function Summary({ today, currency, costMode, onCostMode, peak }) {
-  const hit = cacheHit(today)
-  const parts = today.costParts ?? null
+/**
+ * The headline reads whatever the range selector is showing: one day's totals,
+ * or the totals of the window beside them. Same shape either way, because the
+ * report gives `today` and `window` the same fields.
+ */
+function Summary({ bucket, label, costLabel, currency, costMode, onCostMode, peak, isToday }) {
+  const hit = cacheHit(bucket)
+  const parts = bucket.costParts ?? null
   const byCost = costMode && parts !== null
   const bands = BANDS
-    .filter(band => band.key !== 'cacheWrite' || today.cacheWrite > 0)
-    .map(band => ({ ...band, value: byCost ? (parts[band.key] ?? 0) : (today[band.key] || 0) }))
-  const splitTotal = byCost ? parts.total : today.total
-  const cost = today.cost === null || today.cost === undefined ? '未配置' : money(today.cost, currency)
+    .filter(band => band.key !== 'cacheWrite' || bucket.cacheWrite > 0)
+    .map(band => ({ ...band, value: byCost ? (parts[band.key] ?? 0) : (bucket[band.key] || 0) }))
+  const splitTotal = byCost ? parts.total : bucket.total
+  const cost = bucket.cost === null || bucket.cost === undefined ? '未配置' : money(bucket.cost, currency)
   // A 99%-cache day makes the token split unreadable: two bands collapse to a
   // pixel. The same split priced in money is where the reading actually is.
   const canSwitch = parts !== null && parts.total > 0
@@ -79,12 +86,12 @@ function Summary({ today, currency, costMode, onCostMode, peak }) {
     <Card className="shrink-0 border-line bg-surface/50 px-4 pb-3 pt-3">
       <div className="flex flex-wrap items-start justify-between gap-x-8 gap-y-3">
         <div className="min-w-0">
-          <div className="text-[11px] text-subtle-foreground">今日用量</div>
+          <div className="text-[11px] text-subtle-foreground">{label}</div>
           <div className="mt-1 flex items-baseline gap-1.5">
-            <span className="text-[34px] font-semibold leading-none tracking-tight">{scale(today.total)}</span>
+            <span className="text-[34px] font-semibold leading-none tracking-tight">{scale(bucket.total)}</span>
             <span className="text-[12px] text-muted-foreground">tok</span>
           </div>
-          <div className="mt-2 text-[11px] text-subtle-foreground">{group(today.requests)} 次结算</div>
+          <div className="mt-2 text-[11px] text-subtle-foreground">{group(bucket.requests)} 次结算</div>
         </div>
         <div className="flex items-start gap-10 text-right">
           <div>
@@ -93,21 +100,23 @@ function Summary({ today, currency, costMode, onCostMode, peak }) {
             <div className="mt-1.5 text-[10px] text-subtle-foreground">按输入 token 计</div>
           </div>
           <div>
-            <div className="text-[11px] text-subtle-foreground">今日估算费用</div>
+            <div className="text-[11px] text-subtle-foreground">{costLabel}</div>
             <div className="mt-1 flex items-baseline justify-end gap-1.5">
               <span className="text-[20px] font-semibold leading-none tracking-tight">{cost}</span>
-              <span
-                className={cn(
-                  'rounded border px-1 py-px text-[9.5px] leading-none',
-                  // On a grey card a grey chip is invisible; the state carries a color.
-                  peak
-                    ? 'border-warn/30 bg-warn/10 text-warn'
-                    : 'border-line bg-background text-muted-foreground',
-                )}
-                title="北京时区工作日 09:00–12:00、14:00–18:00 按全价估算，其余时间按 5 折；法定节假日不作特殊处理。"
-              >
-                现在{peak ? '高峰 ×1' : '空闲 ×0.5'}
-              </span>
+              {isToday ? (
+                <span
+                  className={cn(
+                    'rounded border px-1 py-px text-[9.5px] leading-none',
+                    // On a grey card a grey chip is invisible; the state carries a color.
+                    peak
+                      ? 'border-warn/30 bg-warn/10 text-warn'
+                      : 'border-line bg-background text-muted-foreground',
+                  )}
+                  title="北京时区工作日 09:00–12:00、14:00–18:00 按全价估算，其余时间按 5 折；法定节假日不作特殊处理。"
+                >
+                  现在{peak ? '高峰 ×1' : '空闲 ×0.5'}
+                </span>
+              ) : null}
             </div>
             <div className="mt-1.5 text-[10px] text-subtle-foreground">官网价 × 峰谷时段</div>
           </div>
@@ -144,9 +153,9 @@ function Summary({ today, currency, costMode, onCostMode, peak }) {
  * hour. Both keep the request count beside the token total, since a day can be
  * expensive in a few long calls or cheap in many short ones.
  */
-function TrendCard({ rows, hours, window, hasWrite, currency, tab, onTab }) {
+function TrendCard({ rows, hours, window, hasWrite, currency, today }) {
   const [chartRef, chartWidth] = useMeasuredWidth(1120)
-  const hourly = tab === 'hour'
+  const hourly = today
   const firstRecorded = rows.findIndex(row => row.total > 0)
   const visible = firstRecorded === -1 ? [] : rows.slice(firstRecorded)
   const dayCost = window.cost === null || window.cost === undefined ? null : money(window.cost, currency)
@@ -158,23 +167,14 @@ function TrendCard({ rows, hours, window, hasWrite, currency, tab, onTab }) {
   }), { total: 0, requests: 0, cost: null })
   const hourCost = hourTotals.cost === null ? null : money(hourTotals.cost, currency)
 
-  let summary
-  if (hourly) {
-    summary = `今天 · ${tokens(hourTotals.total)} · ${group(hourTotals.requests)} 次${hourCost === null ? '' : ` · ${hourCost}`}`
-  } else {
-    summary = `最近 ${window.days} 天 · ${tokens(window.total)} · ${group(window.requests)} 次${dayCost === null ? '' : ` · ${dayCost}`}`
-  }
+  const summary = hourly
+    ? `今天 · ${tokens(hourTotals.total)} · ${group(hourTotals.requests)} 次${hourCost === null ? '' : ` · ${hourCost}`}`
+    : `最近 ${window.days} 天 · ${tokens(window.total)} · ${group(window.requests)} 次${dayCost === null ? '' : ` · ${dayCost}`}`
 
   return (
     <Card className="shrink-0 px-4 pb-2 pt-3">
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
         <CardTitle>{hourly ? '每小时用量' : '每日用量'}</CardTitle>
-        <Segmented
-          value={tab}
-          onChange={onTab}
-          label="趋势口径"
-          options={[{ value: 'day', label: '每日' }, { value: 'hour', label: '今日' }]}
-        />
         <span className="text-[11px] text-subtle-foreground">{summary}</span>
         <div className="flex-1" />
         <ChartLegend showWrite={hasWrite} peakBands={hourly} />
@@ -239,11 +239,12 @@ function Footer({ allTime, promptNote, unpriced, currency, onOpenPrices }) {
 }
 
 /** Main-column page opened from the left sidebar row. The two `initial*` props are for the preview renderer. */
-export function UsagePage({ initialPricesOpen = false, initialTrendTab = 'day' } = {}) {
-  const [days, setDays] = React.useState(14)
+export function UsagePage({ initialPricesOpen = false, initialRange = 'today' } = {}) {
+  const [range, setRange] = React.useState(initialRange)
   const [costMode, setCostMode] = React.useState(false)
   const [pricesOpen, setPricesOpen] = React.useState(initialPricesOpen)
-  const [trendTab, setTrendTab] = React.useState(initialTrendTab)
+  // Today needs no window; a numeric range fetches exactly its own days.
+  const days = range === 'today' ? DEFAULT_WINDOW : range
   const report = useReport(days)
   const data = report.data
 
@@ -274,6 +275,12 @@ export function UsagePage({ initialPricesOpen = false, initialTrendTab = 'day' }
   const hasWrite = data.window.cacheWrite > 0
   const routes = Array.isArray(data.routes) ? data.routes : []
   const unpriced = routes.filter(route => route.price === null).length
+  // One selector drives the whole page: the headline, the composition bar, and
+  // the chart read the same bucket, so the page cannot show two different spans.
+  const isToday = range === 'today'
+  const bucket = isToday ? today : data.window
+  const label = isToday ? '今日用量' : `最近 ${data.window.days} 天用量`
+  const costLabel = isToday ? '今日估算费用' : `${data.window.days} 天估算费用`
 
   return (
     <div
@@ -286,10 +293,10 @@ export function UsagePage({ initialPricesOpen = false, initialTrendTab = 'day' }
         <span className="text-[11px] text-subtle-foreground">更新于 {updatedAt}</span>
         <div className="flex-1" />
         <Segmented
-          value={days}
-          onChange={setDays}
-          label="统计窗口"
-          options={WINDOWS.map(value => ({ value, label: `${value} 天` }))}
+          value={range}
+          onChange={setRange}
+          label="统计范围"
+          options={[{ value: 'today', label: '今日' }, ...WINDOWS.map(value => ({ value, label: `${value} 天` }))]}
         />
         <Button
           variant="outline"
@@ -309,15 +316,23 @@ export function UsagePage({ initialPricesOpen = false, initialTrendTab = 'day' }
         </div>
       ) : null}
 
-      <Summary today={today} currency={currency} costMode={costMode} onCostMode={setCostMode} peak={isPeak()} />
+      <Summary
+        bucket={bucket}
+        label={label}
+        costLabel={costLabel}
+        currency={currency}
+        costMode={costMode}
+        onCostMode={setCostMode}
+        peak={isPeak()}
+        isToday={isToday}
+      />
       <TrendCard
         rows={data.rows}
         hours={data.hours}
         window={data.window}
         hasWrite={hasWrite}
         currency={currency}
-        tab={trendTab}
-        onTab={setTrendTab}
+        today={isToday}
       />
 
       <Card className="flex min-h-0 flex-1 flex-col overflow-hidden">

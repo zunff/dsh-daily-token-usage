@@ -35,14 +35,32 @@ assert.match(ready.css, /\.dtu-root/, 'page root rules ship with the bundle')
 assert.match(ready.html, /今日用量/)
 assert.match(ready.html, /今日估算费用/)
 assert.match(ready.html, /缓存命中/)
-assert.match(ready.html, /每日用量/)
 assert.match(ready.html, /最近请求/)
 assert.match(ready.html, /单位 tok/)
 assert.match(ready.html, /官网价 × 峰谷时段/)
 assert.match(ready.html, /现在(高峰|空闲) ×(1|0\.5)/, 'the current billing period is stated, not implied')
 assert.match(ready.html, /构成口径/, 'the composition bar switches between tokens and money')
-assert.match(ready.html, /7 天/, 'window chooser offers 7 days')
-assert.match(ready.html, /30 天/, 'window chooser offers 30 days')
+assert.match(ready.html, /7 天/, 'range chooser offers 7 days')
+assert.match(ready.html, /30 天/, 'range chooser offers 30 days')
+
+// The range selector drives the whole page: today's headline and the hourly
+// chart by default, one window's headline and daily bars when a range is picked.
+assert.match(ready.html, /每小时用量/, 'today is the default range')
+assert.match(ready.html, />次数</, 'request counts get their own row')
+assert.match(ready.html, /高峰/, 'peak hours are named in the legend')
+assert.match(ready.html, /空闲/, 'off-peak hours are named in the legend')
+assert.match(ready.html, /今天 · .+ · [\d,]+ 次/, 'the header carries the day total and its count')
+for (const hour of ['0', '6', '12', '21']) {
+  assert.ok(ready.html.includes(`>${hour}<`), `hour tick ${hour}`)
+}
+
+const windowed = await renderPage({ fixture, props: { initialRange: 14 } })
+assert.match(windowed.html, /每日用量/, 'a numeric range shows days')
+assert.match(windowed.html, /最近 14 天用量/, 'the headline follows the range')
+assert.match(windowed.html, /14 天估算费用/)
+assert.match(windowed.html, /最近 14 天 · .+ · [\d,]+ 次/, 'the chart header carries the window count')
+assert.doesNotMatch(windowed.html, />次数</, 'the hourly count row belongs to today only')
+assert.doesNotMatch(windowed.html, /现在(高峰|空闲)/, 'the current tariff is a fact about now, not about a window')
 
 // --- request table ----------------------------------------------------------
 for (const header of ['时间', '状态', '模型', '未缓存输入', '缓存读取', '输出', '费用', '首字', '耗时']) {
@@ -54,17 +72,6 @@ assert.equal((ready.html.match(/>成功</g) ?? []).length, 0, 'a successful requ
 assert.match(ready.html, /bp-DeepSeek-V4\.1-Flash/, 'the model is named the way the catalog names it')
 assert.match(ready.html, /bp-DeepSeek-V4\.1-Flash（deepseek-official\/ds\/deepseek-flash）/, 'the routed id stays reachable')
 
-// --- hourly tab -------------------------------------------------------------
-const hourly = await renderPage({ fixture, props: { initialTrendTab: 'hour' } })
-assert.match(hourly.html, /每小时用量/)
-assert.match(hourly.html, /今日/, 'the hourly tab is selected')
-assert.match(hourly.html, /高峰/, 'peak hours are named in the legend')
-assert.match(hourly.html, /空闲/, 'off-peak hours are named in the legend')
-assert.match(hourly.html, />次数</, 'request counts get their own row')
-assert.match(hourly.html, /今天 · .+ · [\d,]+ 次/, 'the header carries the day total and its count')
-for (const hour of ['0', '6', '12', '21']) {
-  assert.ok(hourly.html.includes(`>${hour}<`), `hour tick ${hour}`)
-}
 
 // --- notes ------------------------------------------------------------------
 assert.match(ready.html, /输入口径已折算/, 'the prompt-shape note collapses into one word')
@@ -98,7 +105,7 @@ assert.match(degraded.html, /重启 DSH/)
 assert.match(degraded.html, /重新读取/)
 assert.doesNotMatch(degraded.html, /每百万 token 的高峰价/, 'no table is promised when there is none')
 
-const degradedHours = await renderPage({ fixture: noPrices, props: { initialTrendTab: 'hour' } })
+const degradedHours = await renderPage({ fixture: noPrices })
 assert.match(degradedHours.html, /这个报表没有按小时的数据/, 'an old payload says why the hourly tab is empty')
 
 // --- failure ----------------------------------------------------------------
@@ -113,9 +120,14 @@ assert.match(failed.html, /重试/)
 const empty = clone(fixture)
 empty.requests = []
 empty.rows = empty.rows.map(row => ({ ...row, total: 0, input: 0, cacheRead: 0, cacheWrite: 0, output: 0, requests: 0, cost: 0 }))
+empty.today = { ...empty.today, total: 0, input: 0, cacheRead: 0, cacheWrite: 0, output: 0, requests: 0, cost: 0, costParts: null }
+empty.hours = empty.hours.map(hour => ({ ...hour, total: 0, input: 0, cacheRead: 0, cacheWrite: 0, output: 0, requests: 0, cost: 0 }))
 const blank = await renderPage({ fixture: empty })
 assert.match(blank.html, /还没有请求记录/)
-assert.match(blank.html, /最近 14 天还没有记录/)
+assert.match(blank.html, /今天还没有记录/)
+// The label follows the payload's own window, not the clicked tab.
+const blankWindow = await renderPage({ fixture: empty, props: { initialRange: 7 } })
+assert.match(blankWindow.html, /最近 14 天还没有记录/)
 
 // --- failed attempt ---------------------------------------------------------
 const withFailure = clone(fixture)
