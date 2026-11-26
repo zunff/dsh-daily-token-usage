@@ -1,0 +1,3 @@
+- insert:
+    - id: daily-token-usage
+      name: '@local/daily-token-usage'

@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "每日 Token 用量",
+    "description": "按本地日历日统计服务商上报的 token 用量并估算金额：左侧栏「用量」入口打开整页仪表盘，含最近 14 天柱状图、今日输入输出拆分、缓存命中率与预估费用；/usage 输出同样的文字报表；token_usage 工具让 agent 也能查。价格取 DeepSeek 官网价（deepseek-flash 未命中 2 元/M、命中 0.04 元/M、输出 8 元/M；deepseek-v4-pro 9 / 0.3 / 27），按北京时间峰谷时段折算，空闲时段 5 折；模型按 provider/model、模型名、家族别名逐级映射，可在 <DSH_HOME>/storages/daily-token-usage/prices.json 覆盖，改完下次报表生效。数据折叠自已落盘的会话日志，不访问任何用量或账单接口，因此换任何 base URL 或统一代理都照常统计。金额为用量乘单价的估算，非账单。"
+  }
+}

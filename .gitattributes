@@ -1,0 +1,4 @@
+# One line ending everywhere: the built bundle is served straight from disk.
+* text=auto eol=lf
+*.png binary
+*.ico binary

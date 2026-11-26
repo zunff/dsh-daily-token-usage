@@ -1,0 +1,30 @@
+/* Tailwind without preflight: this stylesheet is injected into a live host page,
+   so global resets would repaint the whole app. Import theme and utilities only. */
+@layer theme, base, components, utilities;
+
+/* Only scan real sources: scanning the built bundle would keep growing the CSS. */
+@source not "../dist";
+
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities);
+
+@theme inline {
+  --color-background: var(--dsw-alias-bg-layer-1, #ffffff);
+  --color-surface: var(--dsw-alias-bg-layer-2, #f5f6f7);
+  --color-foreground: var(--dsw-alias-label-primary, #17181c);
+  --color-muted-foreground: var(--dsw-alias-label-secondary, #5c6068);
+  --color-subtle-foreground: var(--dsw-alias-label-tertiary, #8b909a);
+  --color-line: var(--dsw-alias-border-l1, rgba(20, 22, 30, 0.1));
+  --color-line-strong: var(--dsw-alias-border-l2, rgba(20, 22, 30, 0.16));
+  --color-brand: var(--dsw-alias-state-business-primary, #4c8dff);
+  --color-success: var(--dsw-alias-state-success-primary, #2f9e44);
+  --color-danger: var(--dsw-alias-state-error-primary, #e03131);
+  --color-warn: var(--dsw-alias-state-warn-primary, #d49b00);
+}
+
+/* Unlayered on purpose: the page sets its own type scale regardless of host resets. */
+.dtu-root {
+  font-size: 12px;
+  line-height: 1.5;
+  font-variant-numeric: tabular-nums;
+}

@@ -1,0 +1,37 @@
+{
+  "name": "@local/daily-token-usage",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Records and reports per-day token usage for DeepSeek Harness, with a Web chart.",
+  "exports": {
+    ".": "./index.js",
+    "./client": "./dist/client.js",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg"
+  },
+  "files": ["index.js", "dist/client.js", "cordis.patch.yml", "locale/*.json", "icon.svg", "README.md"],
+  "scripts": {
+    "build": "vite build",
+    "test": "node test/test.mjs && node test/client.test.mjs",
+    "preview": "node test/preview.mjs"
+  },
+  "dependencies": {
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^3.3.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.1.14",
+    "tailwindcss": "^4.1.14",
+    "vite": "^8.3.8"
+  },
+  "dsh": {
+    "bundle": { "patch": "./cordis.patch.yml" },
+    "client": {
+      "platform": "web",
+      "immediately": true,
+      "inject": ["@deepseek-ai/dsh-client-ui-conversation"]
+    }
+  }
+}

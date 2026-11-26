@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Daily token usage",
+    "description": "Reports provider-reported token usage per local calendar day with a list-price estimate. A 用量 row in the left sidebar opens a page with a 14-day bar chart, today's input/output split, cache hit rate, and estimated cost; /usage prints the same as text; the token_usage tool lets an agent report it. Prices come from DeepSeek's published list (deepseek-flash: 2 cache miss, 0.04 cache hit, 8 output per million tokens CNY; deepseek-v4-pro: 9 / 0.3 / 27), halved off-peak by Beijing time. A model resolves through its exact provider/model, model id, family alias (*flash*, *pro*), and finally *, and any of it can be overridden in <DSH_HOME>/storages/daily-token-usage/prices.json with effect on the next report. Usage is folded from durable session logs, so any base URL or unified proxy works. The cost is usage times price, not a bill."
+  }
+}
