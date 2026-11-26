@@ -31,9 +31,25 @@ const priceOf = key => {
   return { price: null, source: null }
 }
 
+/** The name the profile's model catalog gives a routed id, as the host reports it. */
+const nameOf = key => {
+  const model = key.slice(key.indexOf('/') + 1).toLowerCase()
+  if (model.includes('flash')) return 'bp-DeepSeek-V4.1-Flash'
+  if (model.includes('test')) return 'bp-Test-Route'
+  return null
+}
+
+for (const row of fixture.requests) row.displayName = nameOf(`${row.provider}/${row.model}`)
+
 const list = [...routes.values()].map(entry => {
   const { price, source } = priceOf(entry.key)
-  return { ...entry, total: entry.input + entry.cacheRead + entry.cacheWrite + entry.output, price, priceSource: source }
+  return {
+    ...entry,
+    displayName: nameOf(entry.key),
+    total: entry.input + entry.cacheRead + entry.cacheWrite + entry.output,
+    price,
+    priceSource: source,
+  }
 })
 
 // Two routes the day names but the captured request tail does not reach, so the

@@ -534,4 +534,49 @@ const sessionsWithRoute = () => new Map([
   await rm(home, { recursive: true, force: true })
 }
 
+// ---------------------------------------------------------------- scenario K
+// A model id a session routed by is not always the name the profile shows. The
+// page names the model the way the catalog does and keeps the routed id on the
+// row, so a renamed gateway model still reads as the model a user recognizes.
+{
+  const home = await mkdtemp(path.join(tmpdir(), 'daily-usage-k-'))
+  process.env.DSH_HOME = home
+  const server = fakeWebServer()
+  const persistence = fakePersistence(new Map([
+    ['named', {
+      revision: 'k1',
+      events: [
+        route(0, midnight.getTime(), 'deepseek-official', 'ds/deepseek-flash'),
+        message(1, midnight.getTime() + 1000, { inputTokens: 100, outputTokens: 10 }),
+      ],
+    }],
+  ]))
+  const asked = []
+  const ctx = makeContext(persistence, server)
+  ctx.get = name => {
+    if (name === 'webServer') return server
+    if (name === 'sessionPersistence') return persistence
+    if (name === 'llm') {
+      return {
+        async listModels(provider) {
+          asked.push(provider)
+          return provider === 'deepseek-official'
+            ? [{ id: 'ds/deepseek-flash', name: 'bp-DeepSeek-V4.1-Flash' }]
+            : []
+        },
+      }
+    }
+    return undefined
+  }
+  apply(ctx)
+
+  const json = await reportJson(server, 14)
+  assert.equal(json.requests[0].displayName, 'bp-DeepSeek-V4.1-Flash')
+  assert.equal(json.requests[0].model, 'ds/deepseek-flash', 'the routed id is still reported')
+  assert.equal(json.routes[0].displayName, 'bp-DeepSeek-V4.1-Flash')
+  assert.deepEqual(asked, ['deepseek-official'], 'the catalog is asked once per provider')
+  console.log('scenario K passed')
+  await rm(home, { recursive: true, force: true })
+}
+
 console.log('ALL ASSERTIONS PASSED')

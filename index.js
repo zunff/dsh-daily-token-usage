@@ -42,6 +42,10 @@ const MAX_PRICE_KEY_LENGTH = 200
 const MAX_PRICE_BODY = 64 * 1024
 /** Per-token ceiling accepted from the Web editor; above any real list price. */
 const MAX_PRICE = 1_000_000
+/** How long a model-name lookup from the profile's catalog is trusted. */
+const NAME_CACHE_MS = 5 * 60_000
+/** A catalog that does not answer this fast leaves the report without names. */
+const NAME_TIMEOUT_MS = 3_000
 const PRICE_FIELDS = ['input', 'cacheRead', 'cacheWrite', 'output']
 /** Shipped next to the table so the units are explained where the file is edited. */
 const PRICE_FILE_NOTE = '每 unit（100 万）个 token 的高峰时段价格，人民币。input=缓存未命中输入，cacheRead=缓存命中输入，cacheWrite=缓存写入，output=输出；空闲时段按 5 折。键可以是 provider/model、模型名，或 "*" 兜底；改完下一次报表生效。'
@@ -387,7 +391,7 @@ function costOf(bucket, prices) {
  * The Web page uses it both for the price table it is allowed to edit and for
  * the routes it must warn about: one with no resolvable price has no estimate.
  */
-function routesOf(allTime, prices) {
+function routesOf(allTime, prices, names) {
   const rows = []
   for (const [key, entry] of Object.entries(allTime.models ?? {})) {
     if (key === 'unknown/unknown') continue
@@ -404,6 +408,7 @@ function routesOf(allTime, prices) {
       key,
       provider: key.slice(0, key.indexOf('/')),
       model: key.slice(key.indexOf('/') + 1),
+      displayName: names?.get(key) ?? null,
       ...counts,
       total: counts.input + counts.cacheRead + counts.cacheWrite + counts.output,
       price: priced === undefined ? null : { ...priced.price },
@@ -933,8 +938,49 @@ export function apply(ctx) {
     return amount * factor / prices.unit
   }
 
+  /**
+   * Model names from the profile's catalog, keyed by `provider/model`.
+   *
+   * A session records the id DSH routed by (`ds/deepseek-flash`), which is often
+   * not the name the provider bills or the one the catalog shows
+   * (`bp-DeepSeek-V4.1-Flash`). The page is about what a model cost, so it names
+   * the model the way the user configured it and keeps the routed id beside it.
+   * The lookup is best-effort and cached: an unmounted catalog, an adapter that
+   * cannot answer, and an endpoint that never replies all just leave names out.
+   */
+  let nameCache = { at: 0, key: '', names: new Map() }
+
+  async function modelNames(providers) {
+    const key = [...providers].sort().join(',')
+    if (nameCache.key === key && Date.now() - nameCache.at < NAME_CACHE_MS) return nameCache.names
+    const names = new Map()
+    const llm = ctx.get('llm')
+    if (llm !== undefined && typeof llm.listModels === 'function') {
+      for (const provider of providers) {
+        let timer
+        try {
+          const timeout = new Promise((_, reject) => {
+            timer = setTimeout(() => reject(new Error('catalog timeout')), NAME_TIMEOUT_MS)
+          })
+          const models = await Promise.race([llm.listModels(provider), timeout])
+          for (const model of models ?? []) {
+            if (typeof model?.id !== 'string' || typeof model?.name !== 'string') continue
+            if (model.name.length === 0) continue
+            names.set(`${provider}/${model.id}`, model.name)
+          }
+        } catch {
+          // A catalog that cannot answer is not a reason to fail a report.
+        } finally {
+          clearTimeout(timer)
+        }
+      }
+    }
+    nameCache = { at: Date.now(), key, names }
+    return names
+  }
+
   /** Newest settlements across every cached session, priced, newest first. */
-  function requestRows(prices, shapes) {
+  function requestRows(prices, shapes, names) {
     const merged = []
     for (const entry of cache.values()) {
       for (const request of entry.requests ?? []) merged.push(request)
@@ -951,6 +997,7 @@ export function apply(ctx) {
         start: request.start,
         provider: request.provider,
         model: request.model,
+        displayName: names?.get(routeKey(request.provider, request.model)) ?? null,
         input: peel ? request.input - cacheRead : request.input,
         cacheRead,
         cacheWrite: request.cacheWrite,
@@ -1073,9 +1120,15 @@ export function apply(ctx) {
   }
 
   /** Machine-readable view for the Web client's page. */
-  function reportJson(days, prices) {
+  async function reportJson(days, prices) {
     const shapes = promptShapes()
     const view = aggregate(prices, shapes)
+    const providers = new Set()
+    for (const key of Object.keys(view.allTime.models ?? {})) {
+      const provider = key.slice(0, key.indexOf('/'))
+      if (provider !== 'unknown') providers.add(provider)
+    }
+    const names = await modelNames(providers)
     const bucketOf = date => {
       const bucket = view.days[date] ?? zeroCounts()
       return {
@@ -1139,7 +1192,7 @@ export function apply(ctx) {
         cost: view.cost,
       },
       // Newest settlements, so the page can show a live request flow.
-      requests: requestRows(prices, shapes),
+      requests: requestRows(prices, shapes, names),
       // What the page needs to edit a price: the table actually in force, the
       // shipped list prices to fall back to, and the usage of each route seen.
       prices: {
@@ -1149,7 +1202,7 @@ export function apply(ctx) {
         defaults: DEFAULT_PRICES.models,
         prompt: prices?.prompt ?? DEFAULT_PRICES.prompt,
       },
-      routes: routesOf(view.allTime, prices),
+      routes: routesOf(view.allTime, prices, names),
       currency: view.currency,
       priceNote: priceNote(prices, view.allTime),
       promptNote: promptNote(prices, shapes),
@@ -1179,7 +1232,7 @@ export function apply(ctx) {
             const requested = Number.parseInt(url.searchParams.get('days') ?? '', 10)
             const bounded = Number.isFinite(requested) && requested >= 1 ? Math.min(MAX_REPORT_DAYS, requested) : 14
             await refreshOnce()
-            return jsonResponse(reportJson(bounded, await loadPrices()))
+            return jsonResponse(await reportJson(bounded, await loadPrices()))
           } catch (error) {
             return jsonResponse({ error: String(error?.message ?? error) }, 500)
           }

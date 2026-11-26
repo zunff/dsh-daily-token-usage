@@ -239,7 +239,8 @@
       "firstToken": 860,
       "duration": 2056,
       "failed": false,
-      "cost": 0.0078174
+      "cost": 0.0078174,
+      "displayName": "bp-DeepSeek-V4.1-Flash"
     },
     {
       "time": 1795608673065,
@@ -253,7 +254,8 @@
       "firstToken": 1154,
       "duration": 16945,
       "failed": false,
-      "cost": 0.03747464
+      "cost": 0.03747464,
+      "displayName": "bp-DeepSeek-V4.1-Flash"
     },
     {
       "time": 1795608653280,
@@ -267,7 +269,8 @@
       "firstToken": 1121,
       "duration": 1638,
       "failed": false,
-      "cost": 0.00318352
+      "cost": 0.00318352,
+      "displayName": "bp-DeepSeek-V4.1-Flash"
     },
     {
       "time": 1795608651534,
@@ -281,7 +284,8 @@
       "firstToken": 828,
       "duration": 5535,
       "failed": false,
-      "cost": 0.0077265599999999995
+      "cost": 0.0077265599999999995,
+      "displayName": "bp-DeepSeek-V4.1-Flash"
     },
     {
       "time": 1795608644881,
@@ -295,7 +299,8 @@
       "firstToken": 1411,
       "duration": 1693,
       "failed": false,
-      "cost": 0.00281144
+      "cost": 0.00281144,
+      "displayName": "bp-DeepSeek-V4.1-Flash"
     },
     {
       "time": 1795608641866,
@@ -309,7 +314,8 @@
       "firstToken": 1025,
       "duration": 1487,
       "failed": false,
-      "cost": 0.0029587600000000004
+      "cost": 0.0029587600000000004,
+      "displayName": "bp-DeepSeek-V4.1-Flash"
     },
     {
       "time": 1795608638659,
@@ -323,7 +329,8 @@
       "firstToken": 1490,
       "duration": 1522,
       "failed": false,
-      "cost": 0.0029311999999999997
+      "cost": 0.0029311999999999997,
+      "displayName": "bp-DeepSeek-V4.1-Flash"
     },
     {
       "time": 1795608636046,
@@ -337,7 +344,8 @@
       "firstToken": 823,
       "duration": 1863,
       "failed": false,
-      "cost": 0.0037222799999999997
+      "cost": 0.0037222799999999997,
+      "displayName": "bp-DeepSeek-V4.1-Flash"
     },
     {
       "time": 1795608633072,
@@ -351,7 +359,8 @@
       "firstToken": 1460,
       "duration": 1781,
       "failed": false,
-      "cost": 0.0027951599999999997
+      "cost": 0.0027951599999999997,
+      "displayName": "bp-DeepSeek-V4.1-Flash"
     },
     {
       "time": 1795608630269,
@@ -365,7 +374,8 @@
       "firstToken": 1368,
       "duration": 3254,
       "failed": false,
-      "cost": 0.00552276
+      "cost": 0.00552276,
+      "displayName": "bp-DeepSeek-V4.1-Flash"
     },
     {
       "time": 1795608624101,
@@ -379,7 +389,8 @@
       "firstToken": 1158,
       "duration": 2209,
       "failed": false,
-      "cost": 0.00327008
+      "cost": 0.00327008,
+      "displayName": "bp-DeepSeek-V4.1-Flash"
     },
     {
       "time": 1795608621821,
@@ -393,7 +404,8 @@
       "firstToken": 864,
       "duration": 7924,
       "failed": false,
-      "cost": 0.01300176
+      "cost": 0.01300176,
+      "displayName": "bp-DeepSeek-V4.1-Flash"
     },
     {
       "time": 1795608613833,
@@ -407,7 +419,8 @@
       "firstToken": 899,
       "duration": 11673,
       "failed": false,
-      "cost": 0.0172804
+      "cost": 0.0172804,
+      "displayName": "bp-DeepSeek-V4.1-Flash"
     },
     {
       "time": 1795608602109,
@@ -421,7 +434,8 @@
       "firstToken": 953,
       "duration": 20389,
       "failed": false,
-      "cost": 0.024596200000000002
+      "cost": 0.024596200000000002,
+      "displayName": "bp-DeepSeek-V4.1-Flash"
     },
     {
       "time": 1795608581561,
@@ -435,7 +449,8 @@
       "firstToken": 1002,
       "duration": 4806,
       "failed": false,
-      "cost": 0.00771592
+      "cost": 0.00771592,
+      "displayName": "bp-DeepSeek-V4.1-Flash"
     },
     {
       "time": 1795608576602,
@@ -449,7 +464,8 @@
       "firstToken": 2012,
       "duration": 38634,
       "failed": false,
-      "cost": 0.04272288
+      "cost": 0.04272288,
+      "displayName": "bp-DeepSeek-V4.1-Flash"
     },
     {
       "time": 1795608524041,
@@ -463,7 +479,8 @@
       "firstToken": 1084,
       "duration": 1564,
       "failed": false,
-      "cost": 0.0024087600000000002
+      "cost": 0.0024087600000000002,
+      "displayName": "bp-DeepSeek-V4.1-Flash"
     },
     {
       "time": 1795608522407,
@@ -477,7 +494,8 @@
       "firstToken": 1622,
       "duration": 27259,
       "failed": false,
-      "cost": 0.025289919999999997
+      "cost": 0.025289919999999997,
+      "displayName": "bp-DeepSeek-V4.1-Flash"
     },
     {
       "time": 1795608493661,
@@ -491,7 +509,8 @@
       "firstToken": 1095,
       "duration": 2851,
       "failed": false,
-      "cost": 0.0035321199999999997
+      "cost": 0.0035321199999999997,
+      "displayName": "bp-DeepSeek-V4.1-Flash"
     },
     {
       "time": 1795608482517,
@@ -505,7 +524,8 @@
       "firstToken": 1004,
       "duration": 2552,
       "failed": false,
-      "cost": 0.0039152
+      "cost": 0.0039152,
+      "displayName": "bp-DeepSeek-V4.1-Flash"
     },
     {
       "time": 1795608437046,
@@ -519,7 +539,8 @@
       "firstToken": 901,
       "duration": 20139,
       "failed": false,
-      "cost": 0.0163194
+      "cost": 0.0163194,
+      "displayName": "bp-DeepSeek-V4.1-Flash"
     },
     {
       "time": 1795608080193,
@@ -533,7 +554,8 @@
       "firstToken": 1187,
       "duration": 12274,
       "failed": false,
-      "cost": 0.01013232
+      "cost": 0.01013232,
+      "displayName": "bp-DeepSeek-V4.1-Flash"
     },
     {
       "time": 1795608066516,
@@ -547,7 +569,8 @@
       "firstToken": 1275,
       "duration": 3901,
       "failed": false,
-      "cost": 0.00475204
+      "cost": 0.00475204,
+      "displayName": "bp-DeepSeek-V4.1-Flash"
     },
     {
       "time": 1795608062561,
@@ -561,7 +584,8 @@
       "firstToken": 2670,
       "duration": 12791,
       "failed": false,
-      "cost": 0.008961
+      "cost": 0.008961,
+      "displayName": "bp-DeepSeek-V4.1-Flash"
     },
     {
       "time": 1795608042422,
@@ -575,7 +599,8 @@
       "firstToken": 1450,
       "duration": 2160,
       "failed": false,
-      "cost": 0.00186644
+      "cost": 0.00186644,
+      "displayName": "bp-DeepSeek-V4.1-Flash"
     },
     {
       "time": 1795607920202,
@@ -589,7 +614,8 @@
       "firstToken": 856,
       "duration": 3277,
       "failed": false,
-      "cost": 0.0034946400000000002
+      "cost": 0.0034946400000000002,
+      "displayName": "bp-DeepSeek-V4.1-Flash"
     },
     {
       "time": 1795607916864,
@@ -603,7 +629,8 @@
       "firstToken": 915,
       "duration": 38544,
       "failed": false,
-      "cost": 0.03310836
+      "cost": 0.03310836,
+      "displayName": "bp-DeepSeek-V4.1-Flash"
     },
     {
       "time": 1795607874697,
@@ -617,7 +644,8 @@
       "firstToken": 830,
       "duration": 20821,
       "failed": false,
-      "cost": 0.01658676
+      "cost": 0.01658676,
+      "displayName": "bp-DeepSeek-V4.1-Flash"
     },
     {
       "time": 1795607852827,
@@ -631,7 +659,8 @@
       "firstToken": 1022,
       "duration": 13560,
       "failed": false,
-      "cost": 0.01122788
+      "cost": 0.01122788,
+      "displayName": "bp-DeepSeek-V4.1-Flash"
     },
     {
       "time": 1795607839229,
@@ -645,7 +674,8 @@
       "firstToken": 1483,
       "duration": 2276,
       "failed": false,
-      "cost": 0.0011543200000000001
+      "cost": 0.0011543200000000001,
+      "displayName": "bp-DeepSeek-V4.1-Flash"
     },
     {
       "time": 1795607834788,
@@ -659,7 +689,8 @@
       "firstToken": 919,
       "duration": 5630,
       "failed": false,
-      "cost": 0.00679088
+      "cost": 0.00679088,
+      "displayName": "bp-DeepSeek-V4.1-Flash"
     },
     {
       "time": 1795607829124,
@@ -673,7 +704,8 @@
       "firstToken": 722,
       "duration": 1089,
       "failed": false,
-      "cost": 0.007201440000000001
+      "cost": 0.007201440000000001,
+      "displayName": "bp-DeepSeek-V4.1-Flash"
     },
     {
       "time": 1795607827994,
@@ -687,7 +719,8 @@
       "firstToken": 804,
       "duration": 2171,
       "failed": false,
-      "cost": 0.00498832
+      "cost": 0.00498832,
+      "displayName": "bp-DeepSeek-V4.1-Flash"
     },
     {
       "time": 1795607825762,
@@ -701,7 +734,8 @@
       "firstToken": 772,
       "duration": 1331,
       "failed": false,
-      "cost": 0.0026646
+      "cost": 0.0026646,
+      "displayName": "bp-DeepSeek-V4.1-Flash"
     },
     {
       "time": 1795607822397,
@@ -715,7 +749,8 @@
       "firstToken": 1082,
       "duration": 11312,
       "failed": false,
-      "cost": 0.00887652
+      "cost": 0.00887652,
+      "displayName": "bp-DeepSeek-V4.1-Flash"
     },
     {
       "time": 1795607810030,
@@ -729,7 +764,8 @@
       "firstToken": 856,
       "duration": 1924,
       "failed": false,
-      "cost": 0.00270336
+      "cost": 0.00270336,
+      "displayName": "bp-DeepSeek-V4.1-Flash"
     },
     {
       "time": 1795607807000,
@@ -743,7 +779,8 @@
       "firstToken": 1077,
       "duration": 8858,
       "failed": false,
-      "cost": 0.00866112
+      "cost": 0.00866112,
+      "displayName": "bp-DeepSeek-V4.1-Flash"
     },
     {
       "time": 1795607797977,
@@ -757,7 +794,8 @@
       "firstToken": 2048,
       "duration": 7626,
       "failed": false,
-      "cost": 0.010335439999999998
+      "cost": 0.010335439999999998,
+      "displayName": "bp-DeepSeek-V4.1-Flash"
     },
     {
       "time": 1795607306329,
@@ -771,7 +809,8 @@
       "firstToken": 1157,
       "duration": 5420,
       "failed": false,
-      "cost": 0.00939476
+      "cost": 0.00939476,
+      "displayName": "bp-DeepSeek-V4.1-Flash"
     },
     {
       "time": 1795607298864,
@@ -785,7 +824,8 @@
       "firstToken": 1423,
       "duration": 1792,
       "failed": false,
-      "cost": 0.006745640000000001
+      "cost": 0.006745640000000001,
+      "displayName": "bp-DeepSeek-V4.1-Flash"
     },
     {
       "time": 1795607297004,
@@ -799,7 +839,8 @@
       "firstToken": 1588,
       "duration": 1696,
       "failed": false,
-      "cost": 0.00656308
+      "cost": 0.00656308,
+      "displayName": "bp-DeepSeek-V4.1-Flash"
     },
     {
       "time": 1795607295216,
@@ -813,7 +854,8 @@
       "firstToken": 1225,
       "duration": 1909,
       "failed": false,
-      "cost": 0.00696296
+      "cost": 0.00696296,
+      "displayName": "bp-DeepSeek-V4.1-Flash"
     },
     {
       "time": 1795607293235,
@@ -827,7 +869,8 @@
       "firstToken": 1534,
       "duration": 7305,
       "failed": false,
-      "cost": 0.01090636
+      "cost": 0.01090636,
+      "displayName": "bp-DeepSeek-V4.1-Flash"
     },
     {
       "time": 1795607272958,
@@ -841,7 +884,8 @@
       "firstToken": 1081,
       "duration": 2830,
       "failed": false,
-      "cost": 0.00826
+      "cost": 0.00826,
+      "displayName": "bp-DeepSeek-V4.1-Flash"
     },
     {
       "time": 1795607268783,
@@ -855,7 +899,8 @@
       "firstToken": 2160,
       "duration": 2376,
       "failed": false,
-      "cost": 0.006371440000000001
+      "cost": 0.006371440000000001,
+      "displayName": "bp-DeepSeek-V4.1-Flash"
     },
     {
       "time": 1795607266328,
@@ -869,7 +914,8 @@
       "firstToken": 979,
       "duration": 5418,
       "failed": false,
-      "cost": 0.010379400000000002
+      "cost": 0.010379400000000002,
+      "displayName": "bp-DeepSeek-V4.1-Flash"
     },
     {
       "time": 1795607260843,
@@ -883,7 +929,8 @@
       "firstToken": 1445,
       "duration": 4901,
       "failed": false,
-      "cost": 0.0108068
+      "cost": 0.0108068,
+      "displayName": "bp-DeepSeek-V4.1-Flash"
     },
     {
       "time": 1795607255862,
@@ -897,7 +944,8 @@
       "firstToken": 1466,
       "duration": 1888,
       "failed": false,
-      "cost": 0.00666668
+      "cost": 0.00666668,
+      "displayName": "bp-DeepSeek-V4.1-Flash"
     },
     {
       "time": 1795607253868,
@@ -911,7 +959,8 @@
       "firstToken": 1719,
       "duration": 6702,
       "failed": false,
-      "cost": 0.01368548
+      "cost": 0.01368548,
+      "displayName": "bp-DeepSeek-V4.1-Flash"
     },
     {
       "time": 1795607247103,
@@ -925,7 +974,8 @@
       "firstToken": 1555,
       "duration": 37420,
       "failed": false,
-      "cost": 0.03350156
+      "cost": 0.03350156,
+      "displayName": "bp-DeepSeek-V4.1-Flash"
     }
   ],
   "prices": {
@@ -987,6 +1037,7 @@
       "output": 82029,
       "requests": 50,
       "cost": 0.51074596,
+      "displayName": "bp-DeepSeek-V4.1-Flash",
       "total": 6137258,
       "price": {
         "input": 2,

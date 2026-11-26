@@ -51,6 +51,19 @@ The footer is one line: totals, a warning when a route has no price, and `单价
 and the input-shape caveat used to sit there as a paragraph that grew with every model; they
 now live in the panel, which is also where they can be changed.
 
+## Model names versus routed ids
+
+A settlement records the id DSH routed by, and a profile can point that id at any upstream model:
+the catalog in this machine's patch calls `ds/deepseek-flash` by the name
+`bp-DeepSeek-V4.1-Flash`. A usage page that only showed the routed id would force the reader to
+translate. So the report asks the `llm` service for each provider's catalog (`listModels`) and
+adds `displayName` to every request row and route, and the page shows that name with the
+provider, keeping the routed id in the tooltip. The lookup is cached for five minutes, capped at
+three seconds, and failure is silent: no catalog simply means ids are shown.
+
+Prices never use the display name. Keying stays on `provider/model` as recorded, so renaming a
+model in the catalog cannot change an estimate.
+
 ## Reading a day
 
 The composition bar under the headline splits the day's tokens into cache reads, uncached input,
@@ -85,7 +98,7 @@ Under the chart, the page lists the newest settlements, one row per settlement, 
 |---|---|
 | 时间 | Settlement time (`HH:MM:SS`, or `MM-DD HH:MM` for older days); hover shows the request's start |
 | 状态 | `成功` for a committed message, `失败` for an attempt that settled without one |
-| 模型 | The `model` the settlement named, with its provider beside it |
+| 模型 | The model as the profile's catalog names it (`bp-DeepSeek-V4.1-Flash`), with the provider beside it and the routed id in the tooltip |
 | 未缓存输入 / 缓存读取 / 输出 | Provider-reported token counts for that one settlement |
 | 费用 | The same list price and peak/off-peak factor applied to that settlement |
 | 首字 | First streamed chunk minus the request's start; `—` when nothing was streamed |

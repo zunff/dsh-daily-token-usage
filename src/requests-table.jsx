@@ -6,7 +6,7 @@ import { clock, duration, group, isPeak, money, scale } from './format.js'
 const COLUMNS = [
   { key: 'time', label: '时间', width: 'w-[84px]', help: '结算时间；悬停可看到本次请求的开始时间' },
   { key: 'state', label: '状态', width: 'w-[62px]', help: '只有失败才标出来：成功＝产出了消息，失败＝本次尝试没有产出消息' },
-  { key: 'model', label: '模型', width: '', help: '这次请求实际使用的 provider / model' },
+  { key: 'model', label: '模型', width: 'w-[280px]', help: '模型目录里的名字，悬停可看到 DSH 实际路由的 provider / 模型 id' },
   { key: 'input', label: '未缓存输入', width: 'w-[98px]', numeric: true, help: '未命中缓存的输入 token；有缓存写入时以 +N 标出' },
   { key: 'cache', label: '缓存读取', width: 'w-[92px]', numeric: true, help: '命中缓存、按缓存价计费的输入 token' },
   { key: 'output', label: '输出', width: 'w-[78px]', numeric: true, help: '模型输出的 token' },
@@ -78,8 +78,13 @@ export function RequestsTable({ rows, currency = '¥', today }) {
                   </span>
                 ) : null}
               </TableCell>
-              <TableCell className="truncate" title={`${row.provider}/${row.model}`}>
-                <span className="text-foreground">{row.model}</span>
+              <TableCell
+                className="truncate"
+                title={row.displayName
+                  ? `${row.displayName}（${row.provider}/${row.model}）`
+                  : `${row.provider}/${row.model}`}
+              >
+                <span className="text-foreground">{row.displayName ?? row.model}</span>
                 {showProvider && row.provider ? (
                   <span className="ml-1.5 text-[10px] text-subtle-foreground">{row.provider}</span>
                 ) : null}

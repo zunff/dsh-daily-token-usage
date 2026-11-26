@@ -51,6 +51,8 @@ for (const header of ['时间', '状态', '模型', '未缓存输入', '缓存�
 const bodyRows = (ready.html.match(/<tr class="border-b/g) ?? []).length
 assert.equal(bodyRows, fixture.requests.length + 1, 'one row per settlement plus the header row')
 assert.equal((ready.html.match(/>成功</g) ?? []).length, 0, 'a successful request is not labelled')
+assert.match(ready.html, /bp-DeepSeek-V4\.1-Flash/, 'the model is named the way the catalog names it')
+assert.match(ready.html, /bp-DeepSeek-V4\.1-Flash（deepseek-official\/ds\/deepseek-flash）/, 'the routed id stays reachable')
 
 // --- notes ------------------------------------------------------------------
 assert.match(ready.html, /输入口径已折算/, 'the prompt-shape note collapses into one word')
